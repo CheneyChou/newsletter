@@ -6,8 +6,16 @@ from loguru import logger as log
 from job.job_register import init_job
 from constants import token_value, header_token
 from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    log.info("Starting up init job...")
+    init_job()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.middleware("http")
@@ -30,12 +38,6 @@ log.info("Starting FastAPI application...")
 app.include_router(api_aid, prefix='/aid', tags=['information_data'])
 
 register_tortoise(app, config=TORTOISE_ORM)
-
-
-@app.on_event("startup")
-async def startup_event():
-    log.info("Starting up init job...")
-    init_job()
 
 if __name__ == '__main__':
     import uvicorn
