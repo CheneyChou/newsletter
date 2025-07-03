@@ -2,6 +2,7 @@ version: '3'
 
 services:
   newsletter-crawler:
+    container_name: newsletter
     build:
       context: .
       dockerfile: Dockerfile
